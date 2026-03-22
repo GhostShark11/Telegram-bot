@@ -16,8 +16,8 @@ from aiogram.filters import CommandStart
 #  КОНФИГ
 # ──────────────────────────────────────────────
 load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8477940210:AAHp8L9tpYqZBk8HKcPRW4crdqLYByNlS9w")
-ADMIN_ID = int(os.getenv("ADMIN_ID", "7922641033"))
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s"
@@ -52,7 +52,7 @@ CATEGORIES = {
              {"name": "09 Atlasia Kids", "file_id": "BQACAgUAAxkBAAIBKmm8pGamElErnAABGM7Ninwmj-rRDAACmhwAArVz6VUkn7LFgKDn7zoE"},
              {"name": "10 Atlasia Kids", "file_id": "BQACAgUAAxkBAAIBLGm8pNIs-hwinwSh_8yBzc4_ofpGAAKbHAACtXPpVc9VOZo_7qN-OgQ"},
              {"name": "11 Atlasia Kids", "file_id": "BQACAgUAAxkBAAIBLmm8pN5it2yaNdp2rYPw-QWZ7kCoAAKeHAACtXPpVThZSquqce7AOgQ"},
-             {"name": "12 Atlasia Kids", "file_id": "BQACAgUAAxkBAAIBLmm8pN5it2yaNdp2rYPw-QWZ7kCoAAKeHAACtXPpVThZSquqce7AOgQ"},
+             {"name": "12 Atlasia Kids", "file_id": "PLACEHOLDER_FILE_ID_FIX_ME"},
                  
 
         ],  
@@ -87,11 +87,12 @@ CATEGORIES = {
             "Учебные и информационные презентации на различные темы."
         ),
         "files": [
+             # NOTE: Many file_ids below are duplicated from the first one. Please replace with unique file_ids for each file.
              {"name": "1) Azan", "file_id": "BQACAgUAAxkBAAIBRGm90gFQTDsAAVrsvEbbWcSdZ7kweAACXxsAAkav8FXrXeenlTNC5joE"},
              {"name": "2) Al-Fatiha", "file_id": "BQACAgUAAxkBAAIBR2m90sQQPVHNetEeYL55SbF-EzMAA2IbAAJGr_BVid8Juv0-do46BA"},
              {"name": "3) Basics of Islam", "file_id": "BQACAgUAAxkBAAIBSWm900973DpUuPD0vpkORF5i9gJFAAJjGwACRq_wVZ4HgK8JYrO9OgQ"},
              {"name": "4) Beautiful Women in Islamic History ", "file_id": "BQACAgUAAxkBAAIBS2m9058RadH40HGA8956hNiXaL9dAAJkGwACRq_wVW24XB19i-V5OgQ"},
-             {"name": "5) Belief in Angels", "file_id": "BQACAgUAAxkBAAIBRGm90gFQTDsAAVrsvEbbWcSdZ7kweAACXxsAAkav8FXrXeenlTNC5joE"},
+             {"name": "5) Belief in Angels", "file_id": "PLACEHOLDER_FILE_ID_FIX_ME"},
              {"name": "6) Belief in Books", "file_id": "BQACAgUAAxkBAAIBT2m908m63ViF9mL3UsJZJpvoAXTfAAJmGwACRq_wVUpZMJZr0hmZOgQ"},
              {"name": "7) Belief in God,  Pillars of Islam", "file_id": "BQACAgUAAxkBAAIBUWm91ElfXXBAzY0JmDza3Tmh8_ttAAJnGwACRq_wVWqaagHGvLSrOgQ"},
              {"name": "8) Belief in God, Proofs of Existence of the Creator", "file_id": "BQACAgUAAxkBAAIBVWm91LxK_3aRqfJK5jOg2qxUCy38AAJpGwACRq_wVanSx29HsCIaOgQ"},
@@ -413,7 +414,7 @@ async def get_file_id(message: Message):
     if message.from_user.id != ADMIN_ID:
         return
     fid = message.document.file_id
-    fname = message.document.file_name
+    fname = message.document.file_name or "Unknown"
     await message.answer(
         f"✅ Файл получен!\n\n"
         f"📄 Имя: <b>{fname}</b>\n\n"
@@ -497,11 +498,15 @@ async def send_pdf(callback: CallbackQuery):
     file_info = files[idx]
     await callback.answer(f"📤 Отправляю {file_info['name']}…")
 
-    cat_title = CATEGORIES[cat_key]["title"]
-    await callback.message.answer_document(
-        document=file_info["file_id"],
-        caption=f"📄 <b>{file_info['name']}</b>\n📂 {cat_title}"
-    )
+    try:
+        cat_title = CATEGORIES[cat_key]["title"]
+        await callback.message.answer_document(
+            document=file_info["file_id"],
+            caption=f"📄 <b>{file_info['name']}</b>\n📂 {cat_title}"
+        )
+    except Exception as e:
+        logger.error(f"Failed to send document {file_info['name']}: {e}")
+        await callback.message.answer("❌ Ошибка при отправке файла. Попробуйте позже.")
 
 
 @router.callback_query(F.data.startswith("stories_"))
@@ -539,8 +544,11 @@ async def show_stories(callback: CallbackQuery):
 #  ЗАПУСК
 # ──────────────────────────────────────────────
 async def main():
-    if BOT_TOKEN == "":
-        logger.error(" Вставь BOT_TOKEN в .env файл или прямо в код!")
+    if not BOT_TOKEN:
+        logger.error("BOT_TOKEN not found in environment variables. Please set it in .env file.")
+        return
+    if not ADMIN_ID:
+        logger.error("ADMIN_ID not found in environment variables. Please set it in .env file.")
         return
 
     bot = Bot(
