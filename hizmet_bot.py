@@ -17,12 +17,18 @@ from aiogram.filters import CommandStart
 # ──────────────────────────────────────────────
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID"))
+_admin_id_raw = os.getenv("ADMIN_ID")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+try:
+    ADMIN_ID = int(_admin_id_raw) if _admin_id_raw not in (None, "") else None
+except (TypeError, ValueError):
+    logger.warning("Invalid ADMIN_ID in environment; admin-only actions will be disabled.")
+    ADMIN_ID = None
 
 # ──────────────────────────────────────────────
 #  ДАННЫЕ КАТЕГОРИЙ
@@ -87,12 +93,13 @@ CATEGORIES = {
             "Учебные и информационные презентации на различные темы."
         ),
         "files": [
-             # NOTE: Many file_ids below are duplicated from the first one. Please replace with unique file_ids for each file.
-             {"name": "1) Azan", "file_id": "BQACAgUAAxkBAAIBRGm90gFQTDsAAVrsvEbbWcSdZ7kweAACXxsAAkav8FXrXeenlTNC5joE"},
+               # NOTE: Verify file_ids — several were duplicated during import.
+               # Replace any "PLACEHOLDER_FILE_ID_FIX_ME" values with the correct unique file_id
+               {"name": "1) Azan", "file_id": "BQACAgUAAxkBAAIBRGm90gFQTDsAAVrsvEbbWcSdZ7kweAACXxsAAkav8FXrXeenlTNC5joE"},
              {"name": "2) Al-Fatiha", "file_id": "BQACAgUAAxkBAAIBR2m90sQQPVHNetEeYL55SbF-EzMAA2IbAAJGr_BVid8Juv0-do46BA"},
              {"name": "3) Basics of Islam", "file_id": "BQACAgUAAxkBAAIBSWm900973DpUuPD0vpkORF5i9gJFAAJjGwACRq_wVZ4HgK8JYrO9OgQ"},
              {"name": "4) Beautiful Women in Islamic History ", "file_id": "BQACAgUAAxkBAAIBS2m9058RadH40HGA8956hNiXaL9dAAJkGwACRq_wVW24XB19i-V5OgQ"},
-             {"name": "5) Belief in Angels", "file_id": "PLACEHOLDER_FILE_ID_FIX_ME"},
+               {"name": "5) Belief in Angels", "file_id": "PLACEHOLDER_FILE_ID_FIX_ME"},
              {"name": "6) Belief in Books", "file_id": "BQACAgUAAxkBAAIBT2m908m63ViF9mL3UsJZJpvoAXTfAAJmGwACRq_wVUpZMJZr0hmZOgQ"},
              {"name": "7) Belief in God,  Pillars of Islam", "file_id": "BQACAgUAAxkBAAIBUWm91ElfXXBAzY0JmDza3Tmh8_ttAAJnGwACRq_wVWqaagHGvLSrOgQ"},
              {"name": "8) Belief in God, Proofs of Existence of the Creator", "file_id": "BQACAgUAAxkBAAIBVWm91LxK_3aRqfJK5jOg2qxUCy38AAJpGwACRq_wVanSx29HsCIaOgQ"},
@@ -173,17 +180,17 @@ CATEGORIES = {
              {"name": "84) Supplication Of Job", "file_id": "BQACAgUAAxkBAAIB-2m-QRjlS4RUfVcEe7h3H2z9J8TXAAIhHQACRq_wVXOFxwvoVUc6OgQ"},
              {"name": "85) Supplication Of Job_2", "file_id": "BQACAgUAAxkBAAIB_Wm-QWZE56a-Bl2ZnZqSXoH82shbAAIiHQACRq_wVcIugOyscj0yOgQ"},
              {"name": "86) Supplication Of Jonah", "file_id": "BQACAgUAAxkBAAIB_2m-QWk7y0WgUjE32hVUyUvsPn2vAAIjHQACRq_wVRAhnH338h23OgQ"},
-             {"name": "87) Supplication_2", "file_id": "BQACAgUAAxkBAAIBRGm90gFQTDsAAVrsvEbbWcSdZ7kweAACXxsAAkav8FXrXeenlTNC5joE"},
+             {"name": "87) Supplication_2", "file_id": "PLACEHOLDER_FILE_ID_FIX_ME"},
              {"name": "88) Surah al Fatihah Tafseer Explaination ", "file_id": "BQACAgUAAxkBAAICA2m-QiE3q25Y_NFfi6TSwNEZ6rHfAAImHQACRq_wVc_rrb3rP-ozOgQ"},
              {"name": "89) The Books that defined humanity", "file_id": "BQACAgUAAxkBAAICBWm-Qk5x3YLZDtBh9maT9z55bly7AAInHQACRq_wVXsk2-g5-WfEOgQ"},
              {"name": "90) The Essence of Wisdom", "file_id": "BQACAgUAAxkBAAICB2m-QlNNJfTpp4J__lF0eK30JpEuAAIoHQACRq_wVY6_CtF1cp7VOgQ"},
-             {"name": "91) The Fast of Sacrifice and Haj", "file_id": "BQACAgUAAxkBAAIBRGm90gFQTDsAAVrsvEbbWcSdZ7kweAACXxsAAkav8FXrXeenlTNC5joE"},
+             {"name": "91) The Fast of Sacrifice and Haj", "file_id": "PLACEHOLDER_FILE_ID_FIX_ME"},
              {"name": "92) The Gathering", "file_id": "BQACAgUAAxkBAAICC2m-QuNdE8AhSKBLW78BAAHybs_Y-wACKh0AAkav8FVrK1lBI1ofkzoE"},
              {"name": "93) The last day -Deccal Sufyan Mesih", "file_id": "BQACAgUAAxkBAAICDWm-QyxH7Lipxtwf2uI69jpjovcEAAIrHQACRq_wVSwxhgABsY7gYjoE"},
              {"name": "94) The Necessity of Religion", "file_id": "BQACAgUAAxkBAAICD2m-Q1REArq6QeWAuzcfZuPoLwZhAAIsHQACRq_wVRmhZlM8rPMuOgQ"},
              {"name": "95) The Quran and Science", "file_id": "BQACAgUAAxkBAAICEWm-Q1cfepWtdk2BxJAZfc5vk9quAAItHQACRq_wVSk5DRmbR0rvOgQ"},
              {"name": "96) The Quran", "file_id": "BQACAgUAAxkBAAICE2m-Q1yRFROpU2r825GPhi2up5mNAAIuHQACRq_wVekbhRoWB9LzOgQ"},
-             {"name": "97) The Value of the Prescribed Prayers", "file_id": "BQACAgUAAxkBAAIBRGm90gFQTDsAAVrsvEbbWcSdZ7kweAACXxsAAkav8FXrXeenlTNC5joE"},
+             {"name": "97) The Value of the Prescribed Prayers", "file_id": "PLACEHOLDER_FILE_ID_FIX_ME"},
              {"name": "98) The Worth of Bismillah", "file_id": "BQACAgUAAxkBAAICF2m-Q_ZJyNWCb_MEMnxr_wllRhhKAAIwHQACRq_wVVonWgqokbydOgQ"},
              {"name": "99) True Duty of Men", "file_id": "BQACAgUAAxkBAAICGWm-REWo-tTtsuzLbPj0800V5B6OAAIxHQACRq_wVeBPbGTj7462OgQ"},
              {"name": "94) Understanding", "file_id": "BQACAgUAAxkBAAICG2m-RJ_xqF1_3HrzvkKX7lADD7pZAAI5HQACRq_wVU7NuX_ptFzqOgQ"},
@@ -201,7 +208,8 @@ CATEGORIES = {
 
         ],
         "stories": [
-            
+            "🎯 <b>О разделе Презентаций</b>\n\nКоллекция учебных и информационных презентаций. ``Файлы добавляет администратор`` — отправьте PDF администратору для получения file_id.",
+            "ℹ️ <b>Примечание</b>:\nНекоторые file_id в этом списке временно помечены как PLACEHOLDER_FILE_ID_FIX_ME. Замените их на реальные file_id, полученные через отправку PDF в чат бота (только для администратора)."
         ]
     },
 
