@@ -1,0 +1,8 @@
+Hi @Ibrohim2015 — I prepared this PR with these fixes:
+- Robust ADMIN_ID parsing
+- Replaced duplicated presentations file_ids with placeholders (please replace placeholders with real file_ids)
+- Added guidance stories and normalized .env line endings
+
+I attempted to merge but received a "Resource not accessible by integration" error (insufficient permission). Please review and merge via the web UI when convenient: https://github.com/Ibrohim2015/Telegram-bot/pull/1
+
+If you want me to merge directly, please either add a repo-scoped personal access token (or GitHub App) that I can use here, or add my account as a collaborator with merge rights. Thanks!
